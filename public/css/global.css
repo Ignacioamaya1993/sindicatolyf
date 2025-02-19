@@ -1,0 +1,112 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background: #003366;
+    padding: 15px 0;
+    text-align: center;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin: 0 15px;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* Logo */
+.logo {
+    display: flex;
+    align-items: center; /* Alinea el logo verticalmente */
+    padding: 10px; /* Elimina el padding adicional */
+    margin-right: 50px; /* Empuja el logo a la izquierda */
+
+}
+
+.logo img {
+    max-height: 110px; /* Ajusta el valor según el tamaño que desees */
+}
+
+/* Footer */
+footer {
+    background-color: #333333;
+    color: #ecf0f1; /* Blanco suave */
+    font-size: 0.9rem;
+    padding: 0px 0; /* Reducimos el padding */
+    text-align: center;
+}
+
+/* Estructura del footer en fila */
+.footer-container {
+    display: flex;
+    justify-content: space-between; /* Distribuye los elementos */
+    align-items: center;
+    text-align: center;
+    padding: 5px 20px; /* Reduce altura y agrega margen lateral */
+}
+
+/* Alineamos cada sección correctamente */
+.footer-info {
+    text-align: left;
+    flex: 1;
+}
+
+.footer-social {
+    flex-grow: 1; /* Permite que los iconos ocupen el espacio necesario */
+    display: flex;
+    justify-content: center; /* Centramos los iconos */
+    gap: 15px;
+    width: 50%;
+}
+
+.footer-design {
+    display: flex;
+    align-items: center; /* Alinea el logo y el texto verticalmente */
+    justify-content: center; /* Centra el contenido */
+    position: relative;
+}
+
+.footer-design::after {
+    content: ""; /* Necesario para que el pseudo-elemento funcione */
+    background: url("../assets/logos/logoia.png") no-repeat center;
+    background-size: contain; /* Ajusta la imagen al tamaño del contenedor */
+    width: 150px; /* Tamaño del logo */
+    height: 60px;
+    display: inline-block;
+}
+
+/* Enlaces y efectos */
+.footer-info a {
+    color: #ecf0f1;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.footer-info a:hover {
+    color: #a8dadc;
+}
+
+/* Íconos */
+.social-icon {
+    color: #ecf0f1;
+    font-size: 1.5rem;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.social-icon:hover {
+    color: #a8dadc;
+}
