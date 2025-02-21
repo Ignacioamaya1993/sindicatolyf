@@ -41,30 +41,25 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr); /* 4 columnas */
     gap: 20px;
-    max-width: 1200px; /* Ajustado para 4 columnas */
+    max-width: 1200px; /* Ajusta según el ancho deseado */
     margin: 0 auto;
-    padding: 20px;
 }
 
 .card {
     background: white;
-    width: 100%;
-    height: 350px; /* 📌 Altura fija para todas las cards */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
     padding: 15px;
-    overflow: hidden; /* Evita que crezca más allá del tamaño fijo */
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    text-align: center;
+    width: 100%;
+    max-width: 400px; /* Limita el ancho */
 }
 
 .card img {
     width: 100%;
-    height: 150px; /* 📌 Tamaño fijo para la imagen */
-    object-fit: contain; /* 🔹 Se ajusta sin recortarse */
-    border-radius: 5px;
+    height: 400px;
+    object-fit: cover; /* Ajusta la imagen sin deformarse */
+    border-radius: 10px;
 }
 
 .card h3 {
