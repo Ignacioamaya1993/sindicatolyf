@@ -40,7 +40,6 @@
 .noticias-container {
     display: grid;
     grid-template-columns: repeat(4, 1fr); /* 4 columnas */
-    grid-template-rows: repeat(2, auto);  /* 2 filas */
     gap: 20px;
     max-width: 1200px; /* Ajustado para 4 columnas */
     margin: 0 auto;
@@ -49,36 +48,46 @@
 
 .card {
     background: white;
-    padding: 15px;
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    text-align: center;
+    width: 100%;
+    height: 350px; /* 📌 Altura fija para todas las cards */
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: space-between;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 15px;
+    overflow: hidden; /* Evita que crezca más allá del tamaño fijo */
 }
 
 .card img {
     width: 100%;
-    height: 200px; /* Tamaño fijo */
-    object-fit: cover; /* Mantiene proporción y recorta si es necesario */
+    height: 150px; /* 📌 Tamaño fijo para la imagen */
+    object-fit: contain; /* 🔹 Se ajusta sin recortarse */
     border-radius: 5px;
 }
 
 .card h3 {
     margin: 10px 0;
-    font-size: 18px;
+    font-size: 16px;
     color: #333;
+    text-align: center;
 }
 
 .card p {
     font-size: 14px;
     color: #555;
+    text-align: center;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3; /* 🔹 Limita a 3 líneas en WebKit */
+    line-clamp: 3; /* 🔹 Propiedad estándar para compatibilidad */
 }
+
 
 .ver-mas {
     display: inline-block;
-    margin-top: 10px;
     padding: 8px 12px;
     background: #003366;
     color: white;
