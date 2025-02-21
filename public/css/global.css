@@ -113,3 +113,58 @@ footer {
 .social-icon:hover {
     color: #a8dadc;
 }
+
+/* Estilos responsive */
+@media (max-width: 768px) {
+    .header-container {
+        flex-direction: column; /* Pone los elementos en columna en pantallas pequeñas */
+        align-items: center;
+    }
+
+    nav {
+        margin-top: 20px;
+    }
+
+    nav ul {
+        flex-direction: column; /* Cambia el menú de horizontal a vertical */
+        gap: 10px;
+    }
+
+    .footer-container {
+        flex-direction: column; /* Pone el footer en columna */
+        text-align: center;
+    }
+
+    .footer-info {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .footer-social {
+        width: 100%; /* Hace que los iconos de las redes sociales ocupen todo el ancho */
+        justify-content: center;
+    }
+
+    .footer-design {
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logolyf img, .logofatlyf img {
+        max-height: 60px; /* Ajusta el tamaño de los logos en pantallas muy pequeñas */
+    }
+
+    .footer-design::after {
+        width: 120px; /* Ajusta el tamaño del logo del footer */
+        height: 50px;
+    }
+
+    .footer-info a {
+        font-size: 0.8rem; /* Reduce el tamaño de los enlaces en el footer */
+    }
+
+    .social-icon {
+        font-size: 1.2rem; /* Reduce el tamaño de los iconos en el footer */
+    }
+}
