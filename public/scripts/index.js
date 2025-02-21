@@ -1,55 +1,46 @@
-import { db } from "./firebase-config.js";
+import { db } from "./firebaseConfig.js"; // Importa Firestore desde tu config
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// -------------- CARRUSEL ---------------- //
-let index = 0;
-const slides = document.querySelectorAll(".slide");
-
-function showSlide(n) {
-    slides.forEach(slide => slide.classList.remove("active"));
-    slides[n].classList.add("active");
-}
-
-document.querySelector(".prev").addEventListener("click", () => {
-    index = (index > 0) ? index - 1 : slides.length - 1;
-    showSlide(index);
-});
-
-document.querySelector(".next").addEventListener("click", () => {
-    index = (index < slides.length - 1) ? index + 1 : 0;
-    showSlide(index);
-});
-
-// Cambio automático de imágenes cada 5 segundos
-setInterval(() => {
-    index = (index < slides.length - 1) ? index + 1 : 0;
-    showSlide(index);
-}, 5000);
-
-// -------------- CARGA DINÁMICA DE NOTICIAS ---------------- //
 document.addEventListener("DOMContentLoaded", async () => {
+    console.log("🚀 Script cargado correctamente.");
+
     const noticiasContainer = document.getElementById("noticiasContainer");
 
     if (!noticiasContainer) {
-        console.error("No se encontró el contenedor de noticias.");
+        console.error("❌ ERROR: No se encontró el contenedor de noticias.");
         return;
     }
 
+    console.log("📌 Contenedor de noticias encontrado:", noticiasContainer);
+
     try {
-        const querySnapshot = await getDocs(collection(db, "noticias"));
+        const noticiasRef = collection(db, "noticias"); // Asegúrate de que "noticias" es el nombre correcto
+        console.log("📡 Obteniendo noticias de Firestore...");
+
+        const querySnapshot = await getDocs(noticiasRef);
+        
+        if (querySnapshot.empty) {
+            console.warn("⚠️ No se encontraron noticias en Firestore.");
+        }
 
         querySnapshot.forEach((doc) => {
+            console.log("📰 Noticia encontrada:", doc.id, doc.data());
+
             const noticia = doc.data();
-            const noticiaHTML = `
-                <div class="card">
-                    <img src="${noticia.imagen}" alt="${noticia.titulo}">
-                    <h3>${noticia.titulo}</h3>
-                    <p>${noticia.descripcion}</p>
-                </div>
+            const noticiaElement = document.createElement("div");
+            noticiaElement.classList.add("noticia");
+
+            noticiaElement.innerHTML = `
+                <h3>${noticia.titulo || "Sin título"}</h3>
+                <p>${noticia.descripcion || "Sin descripción"}</p>
+                ${noticia.imagen ? `<img src="${noticia.imagen}" alt="Imagen de la noticia">` : ""}
             `;
-            noticiasContainer.innerHTML += noticiaHTML;
+
+            noticiasContainer.appendChild(noticiaElement);
         });
+
+        console.log("✅ Noticias cargadas correctamente.");
     } catch (error) {
-        console.error("Error obteniendo noticias:", error);
+        console.error("❌ ERROR al obtener noticias de Firestore:", error);
     }
 });
