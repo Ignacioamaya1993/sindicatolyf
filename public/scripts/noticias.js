@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             // Añadir una opción "Todas" para que se pueda filtrar por todas las categorías
             const todasOption = document.createElement("option");
             todasOption.value = "";
-            todasOption.textContent = "Todas";
+            todasOption.textContent = "Todas las categorías";
             buscarCategoria.insertBefore(todasOption, buscarCategoria.firstChild);
 
             // Seleccionar "Todas" por defecto
