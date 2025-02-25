@@ -35,15 +35,21 @@
 .noticias {
     text-align: center;
     padding: 20px;
+    cursor: pointer;
+}
+
+.noticias h2 {
+    color: #ffffff; /* Cambia el color a lo que desees */
+    font-size: 24px; /* Ajusta el tamaño de la fuente si es necesario */
+    font-weight: bold; /* Establece el grosor de la fuente, si lo deseas */
 }
 
 .noticias-container {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 columnas */
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
-    max-width: 1400px; /* Ajusta según el ancho deseado */
-    margin: 0 auto;
-    margin-bottom: 20px;
+    padding: 20px;
+    margin-top: 20px;
 }
 
 .noticias-container div {

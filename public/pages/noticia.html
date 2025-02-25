@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Cartilla Médica Luz y Fuerza Olavarría</title>
     <link rel="stylesheet" href="../styles/global.css">
-    <link rel="stylesheet" href="../styles/cartillamedica.css">
+    <link rel="stylesheet" href="../styles/noticia.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
@@ -16,8 +16,8 @@
             <div class="logolyf">
                 <a href="../index.html">
                     <img src="../assets/logos/logolyf.png" alt="Logo Luz y Fuerza">
-                </a>            
-                </div>
+                </a>
+            </div>
             <nav>
                 <ul>
                     <li><a href="../index.html">Inicio</a></li>
@@ -26,57 +26,16 @@
                     <li><a href="cartillamedica.html">Cartilla Médica</a></li>
                 </ul>
             </nav>
-            
             <div class="logofatlyf">
-                <a href="https://osfatlyf.org/" target="_blank">
+                <a href="https://fatlyf.org/" target="_blank">
                     <img src="../assets/logos/logofatlyf.webp" alt="Logo FATLyF">
                 </a>
             </div>
         </div>
     </header>
 
-    <div class="container">
-        <div class="header"></div>
-        <div class="controls-wrapper">
-            <div class="controls">
-                <label for="recordsPerPage">Mostrar</label>
-                <select id="recordsPerPage">
-                    <option value="10">10</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                </select>
-                <label for="specialtyFilter">Especialidad</label>
-                <select id="specialtyFilter">
-                    <option value="all">Todas</option>
-                </select>
-                <label for="search">Buscar:</label>
-                <input type="text" id="search" placeholder="Nombre del profesional">
-            </div>
-
-            <div class="updated-info">
-                Datos actualizados a través de la página del Círculo Médico Olavarría al día 25/02/2025.
-            </div>
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>ESPECIALIDAD</th>
-                    <th>APELLIDO Y NOMBRE</th>
-                    <th class="hide-on-mobile">DIRECCION</th>
-                    <th class="hide-on-mobile">LOCALIDAD</th>
-                    <th class="hide-on-mobile">TELEFONO</th>
-                    <th>UBICACIÓN</th>
-                </tr>
-            </thead>
-            <tbody id="professionalList"></tbody>
-        </table>
-        <div id="pagination">
-            <button id="prevPage">Anterior</button>
-            <span id="pageInfo"></span>
-            <button id="nextPage">Siguiente</button>
-        </div>
-    </div>
+    <!-- Contenedor donde se mostrará la noticia -->
+    <div id="noticiaContainer"></div>
 
     <footer>
         <div class="footer-container">
@@ -100,9 +59,7 @@
             </div>
         </div>
     </footer>
-
-    <script type="module" src="../scripts/cartillamedica.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+        
+    <script type="module" src="../scripts/noticia.js"></script>
 </body>
 </html>

@@ -1,0 +1,85 @@
+.search-container {
+    margin: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    align-items: center;
+}
+
+#buscarTitulo, #buscarCategoria {
+    padding: 12px 16px;
+    font-size: 16px;
+    width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+}
+
+#buscarTitulo:focus, #buscarCategoria:focus {
+    outline: none;
+    border-color: #003366;
+    box-shadow: 0 0 10px rgba(0, 51, 102, 0.4);
+}
+
+#buscarBtn {
+    padding: 12px 24px;
+    font-size: 16px;
+    background-color: #003366;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#buscarBtn:hover {
+    background-color: #002244;
+    transform: translateY(-2px);
+}
+
+#buscarBtn:active {
+    transform: translateY(1px);
+}
+
+
+.noticias-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 20px;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.noticias-container div {
+    padding: 15px;
+    background-color: #73ccf5;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.25); /* Ajuste del sombreado */
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.noticias-container div:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15); /* Sombra al hacer hover */
+}
+
+.noticias-container div h3 {
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+.noticias-container div p {
+    font-size: 14px;
+    color: #020101;
+}
+
+.noticias-container div img {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+}

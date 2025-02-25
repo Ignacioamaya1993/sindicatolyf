@@ -2,10 +2,12 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
+    background: url('/public/assets/img/fondo.png') no-repeat center center;
+    background-size: cover;
+    background-attachment: fixed; /* Si quieres que el fondo se quede fijo mientras se hace scroll */
 }
 
 header {
-    background: #85baee;
     padding: 10px 20px;
 }
 
@@ -17,8 +19,13 @@ header {
     margin: 0 auto;
 }
 
-.logolyf img, .logofatlyf img {
+.logolyf img {
     max-height: 90px; /* Tamaño de los logos */
+    width: auto;
+}
+
+.logofatlyf img{
+    max-height: 70px;
     width: auto;
 }
 

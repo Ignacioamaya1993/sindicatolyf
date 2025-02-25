@@ -5,27 +5,6 @@
     flex: 1;
 }
 
-/* Header */
-.header {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-}
-
-.header h1 {
-    flex: 1;
-    text-align: center;
-    color: #08c3f1;
-    margin: 0;
-}
-
-.header .logo {
-    width: 150px;
-    height: auto;
-    margin-left: 20px;
-}
-
 /* Controls */
 .controls-wrapper {
     margin-bottom: 20px;
@@ -113,6 +92,7 @@ tr:nth-child(odd) {
     justify-content: center;
     align-items: center;
     margin-top: 20px;
+    margin-bottom: 10px;
 }
 
 #pagination button {
