@@ -1,4 +1,3 @@
-import { db } from "./firebaseConfig.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
 document.addEventListener("DOMContentLoaded", async () => {

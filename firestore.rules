@@ -1,9 +1,17 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Reglas para la colección "noticias"
     match /noticias/{docId} {
-      allow read: if true;  // ✅ Permite leer cualquier noticia
-      allow write: if false; // ❌ No permite escribir
+      allow read: if true;  // ✅ Cualquiera puede leer noticias
+      allow write: if request.auth != null && request.auth.token.role == "admin"; // ✅ Solo administradores pueden escribir
+    }
+    
+    // Reglas para la colección "profesionales"
+    match /profesionales/{docId} {
+      allow read: if true;  // ✅ Cualquier usuario puede leer la información de profesionales
+      allow write: if request.auth != null && request.auth.token.role == "admin"; // ✅ Solo administradores pueden agregar/modificar profesionales
     }
   }
 }

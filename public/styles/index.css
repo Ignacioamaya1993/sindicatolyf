@@ -43,6 +43,7 @@
     gap: 20px;
     max-width: 1400px; /* Ajusta según el ancho deseado */
     margin: 0 auto;
+    margin-bottom: 20px;
 }
 
 .noticias-container div {
@@ -103,6 +104,12 @@
     text-decoration: none;
     border-radius: 5px;
     font-size: 14px;
+    transition: transform 0.2s;
+}
+
+.ver-mas:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15); /* Sombra al hacer hover */
 }
 
 /* ✅ Responsivo: Ajuste para pantallas pequeñas */
