@@ -76,7 +76,7 @@ function renderProfessionals() {
             <td>${professional.telefono || ''}</td>
             <td>
                 <button class="map-button" data-address="${fullAddress}">
-                    <img src="../public/assets/logos/maps.png" alt="Google Maps" width="40">
+                    <img src="../assets/logos/maps.png" alt="Google Maps" width="40">
                 </button>
             </td>`;
         
