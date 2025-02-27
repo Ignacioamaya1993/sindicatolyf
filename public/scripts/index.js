@@ -1,4 +1,4 @@
-import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, orderBy, query,doc} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
     console.log("🚀 Script cargado correctamente.");
@@ -33,25 +33,25 @@ document.addEventListener("DOMContentLoaded", async () => {
         let count = 0; // Contador de noticias mostradas
 
         querySnapshot.forEach((doc) => {
-            if (count < maxNoticias) { // Solo mostrar las primeras 8 noticias
+            if (count < maxNoticias) { 
                 const noticia = doc.data();
-                const noticiaId = doc.id; // Obtener el ID de la noticia
-
+                const noticiaId = doc.id; 
+        
                 const noticiaElement = document.createElement("div");
-                noticiaElement.classList.add("noticia");
-                noticiaElement.setAttribute("data-id", noticiaId); // Asignar el ID al elemento
-
+                noticiaElement.classList.add("noticia"); // Agrega la clase para los estilos
+                noticiaElement.setAttribute("data-id", noticiaId);
+        
                 noticiaElement.innerHTML = `
                     <h3 class="titulo-noticia">${noticia.titulo || "Sin título"}</h3>
                     <p>${noticia.shortext || "Sin descripción"}</p>
                     ${noticia.imagen ? `<img src="${noticia.imagen}" alt="Imagen de la noticia">` : ""}
                 `;
-
+        
                 noticiasContainer.appendChild(noticiaElement);
                 count++;
             }
-        });
-
+        });     
+            
         // Si hay más de 8 noticias, mostrar el botón "ver más noticias"
         if (querySnapshot.size > maxNoticias) {
             verMasBtn.style.display = "inline-block"; // Mostrar el botón

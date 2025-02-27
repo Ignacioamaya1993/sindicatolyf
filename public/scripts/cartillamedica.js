@@ -31,7 +31,7 @@ async function loadProfessionalsFromFirestore() {
 function populateSpecialtyFilter() {
     const specialties = [...new Set(professionals.map(p => p.especialidad))];
     const specialtyFilter = document.getElementById('specialtyFilter');
-    specialtyFilter.innerHTML = '<option value="all">TODAS LAS ESPECIALIDADES</option>';
+    specialtyFilter.innerHTML = '<option value="all">Todas las especialidades</option>';
 
     specialties.forEach(specialty => {
         const option = document.createElement('option');
@@ -70,7 +70,7 @@ function renderProfessionals() {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${professional.especialidad || ''}</td>
-            <td><span class="professional-link">${professional.apenom || ''}</span></td>
+            <td><span class="professional-link" data-id="${professional.id}">${professional.apenom || ''}</span></td>
             <td>${professional.direccion || ''}</td>
             <td>${professional.localidad || ''}</td>
             <td>${professional.telefono || ''}</td>
@@ -79,30 +79,87 @@ function renderProfessionals() {
                     <img src="../assets/logos/maps.png" alt="Google Maps" width="40">
                 </button>
             </td>`;
-        
+
         professionalList.appendChild(row);
     });
 
+    // Agregar eventos a los botones de mapa
     document.querySelectorAll('.map-button').forEach(button => {
         button.addEventListener('click', function () {
             const address = this.getAttribute('data-address');
             showMap(address);
         });
     });
+
+    // Agregar eventos a los nombres de los profesionales
+    document.querySelectorAll('.professional-link').forEach(link => {
+        link.addEventListener('click', function () {
+            const professionalId = this.getAttribute('data-id');
+            const professional = professionals.find(p => p.id === professionalId);
+            if (professional) {
+                showProfessionalDetails(professional);
+            }
+        });
+    });
 }
 
-// Mostrar Google Maps en una nueva ventana
-// Mostrar Google Maps en un pop-up con SweetAlert2
-function showMap(address) {
-    const mapUrl = `https://www.google.com/maps/embed/v1/place?key=${googleMapsApiKey}&q=${encodeURIComponent(address)}`;
-
+// Función para mostrar detalles del profesional en un pop-up
+function showProfessionalDetails(professional) {
     Swal.fire({
-        title: 'Ubicación en Google Maps',
-        html: `<iframe width="100%" height="400px" style="border:0;" loading="lazy" allowfullscreen 
-            referrerpolicy="no-referrer-when-downgrade" src="${mapUrl}"></iframe>`,
-        width: 600,
-        showCloseButton: true,
+        title: professional.apenom,
+        html: `
+            <p><strong>Especialidad:</strong> ${professional.especialidad}</p>
+            <p><strong>Dirección:</strong> ${professional.direccion}</p>
+            <p><strong>Localidad:</strong> ${professional.localidad}</p>
+            <p><strong>Teléfono:</strong> ${professional.telefono}</p>
+        `,
         confirmButtonText: 'Cerrar'
+    });
+}
+
+
+// Llama a la función initMap cuando se necesita mostrar el mapa
+// Llama a la función initMap cuando se necesita mostrar el mapa
+function showMap(address) {
+    var geocoder = new google.maps.Geocoder();
+
+    // Log para verificar la dirección
+    console.log('Dirección enviada a geocoder:', address);
+
+    geocoder.geocode({ 'address': address }, function(results, status) {
+        if (status == google.maps.GeocoderStatus.OK) {
+            var lat = results[0].geometry.location.lat();
+            var lng = results[0].geometry.location.lng();
+
+            // Imprime las coordenadas en la consola para verificar
+            console.log('Latitud:', lat, 'Longitud:', lng);
+
+            Swal.fire({
+                title: 'Ubicación',
+                html: `<div id="map-container" style="width: 100%; height: 300px;">
+                           <iframe id="map" width="100%" height="100%" frameborder="0" style="border:0" allowfullscreen></iframe>
+                       </div>`,
+                confirmButtonText: 'Cerrar',
+                didOpen: () => {
+                    setTimeout(() => {
+                        const mapIframe = document.getElementById('map');
+                        if (mapIframe) {
+                            const mapUrl = `https://www.google.com/maps/embed/v1/place?key=${googleMapsApiKey}&q=${lat},${lng}`;
+                            mapIframe.src = mapUrl;
+                            console.log("Mapa cargado con URL:", mapUrl);
+                        }
+                    }, 200); // Pequeño retraso para asegurar la carga
+                },
+                customClass: {
+                    popup: 'swal2-popup-custom',
+                    title: 'swal2-title-custom',
+                    htmlContainer: 'swal2-html-custom',
+                }
+            });
+        } else {
+            console.error('Geocode no tuvo éxito debido a: ' + status);
+            Swal.fire('Error', 'No se pudo mostrar la ubicación en el mapa', 'error');
+        }
     });
 }
 
