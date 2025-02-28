@@ -42,10 +42,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                 noticiaElement.setAttribute("data-id", noticiaId);
         
                 noticiaElement.innerHTML = `
-                    <h3 class="titulo-noticia">${noticia.titulo || "Sin título"}</h3>
-                    <p>${noticia.shortext || "Sin descripción"}</p>
-                    ${noticia.imagen ? `<img src="${noticia.imagen}" alt="Imagen de la noticia">` : ""}
-                `;
+                <h3 class="titulo-noticia">${noticia.titulo || "Sin título"}</h3>
+                <!-- <p>${noticia.shortext || "Sin descripción"}</p> -->
+                ${noticia.imagen ? `<img src="${noticia.imagen}" alt="Imagen de la noticia">` : ""}
+            `;
+            
         
                 noticiasContainer.appendChild(noticiaElement);
                 count++;

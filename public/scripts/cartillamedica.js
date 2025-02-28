@@ -91,6 +91,43 @@ function renderProfessionals() {
         });
     });
 
+    if (window.innerWidth <= 776) {
+        document.querySelectorAll('.professional-link').forEach(link => {
+            link.addEventListener('click', function () {
+                const specialty = this.parentElement.previousElementSibling.textContent;
+                const address = this.parentElement.nextElementSibling.textContent;
+                const city = this.parentElement.nextElementSibling.nextElementSibling.textContent;
+                const phone = this.parentElement.nextElementSibling.nextElementSibling.nextElementSibling.textContent;
+
+                // Construye la dirección completa con la ciudad y el país para la versión móvil
+                const fullAddress = `${address}, ${city}, Buenos Aires, Argentina`;
+                console.log('Dirección completa (móvil):', fullAddress); // Log para verificar la dirección en móvil
+
+                const mapUrl = `https://www.google.com/maps/embed/v1/place?key=${googleMapsApiKey}&q=${encodeURIComponent(fullAddress)}`;
+                console.log('Mapa URL (móvil):', mapUrl);
+
+                Swal.fire({
+                    icon: 'info',
+                    title: this.textContent,
+                    html: `
+                        <p><strong>Especialidad:</strong> ${specialty}</p>
+                        <p><strong>Dirección:</strong> ${address}</p>
+                        <p><strong>Localidad:</strong> ${city}</p>
+                        <p><strong>Teléfono:</strong> ${phone}</p>
+                        <iframe id="map" width="100%" height="200" frameborder="0" style="border:0" src="${mapUrl}" allowfullscreen></iframe>
+                    `,
+                    confirmButtonText: 'Cerrar',
+                    customClass: {
+                        popup: 'swal2-popup-custom',
+                        title: 'swal2-title-custom',
+                        htmlContainer: 'swal2-html-custom',
+                    }
+                });
+            });
+        });
+    }
+}
+
     // Agregar eventos a los nombres de los profesionales
     document.querySelectorAll('.professional-link').forEach(link => {
         link.addEventListener('click', function () {
@@ -101,7 +138,6 @@ function renderProfessionals() {
             }
         });
     });
-}
 
 // Función para mostrar detalles del profesional en un pop-up
 function showProfessionalDetails(professional) {
@@ -117,8 +153,6 @@ function showProfessionalDetails(professional) {
     });
 }
 
-
-// Llama a la función initMap cuando se necesita mostrar el mapa
 // Llama a la función initMap cuando se necesita mostrar el mapa
 function showMap(address) {
     var geocoder = new google.maps.Geocoder();
@@ -141,14 +175,10 @@ function showMap(address) {
                        </div>`,
                 confirmButtonText: 'Cerrar',
                 didOpen: () => {
-                    setTimeout(() => {
-                        const mapIframe = document.getElementById('map');
-                        if (mapIframe) {
-                            const mapUrl = `https://www.google.com/maps/embed/v1/place?key=${googleMapsApiKey}&q=${lat},${lng}`;
-                            mapIframe.src = mapUrl;
-                            console.log("Mapa cargado con URL:", mapUrl);
-                        }
-                    }, 200); // Pequeño retraso para asegurar la carga
+                    const mapIframe = document.getElementById('map');
+                    if (mapIframe) {
+                        mapIframe.src = `https://www.google.com/maps/embed/v1/place?key=${googleMapsApiKey}&q=${lat},${lng}`;
+                    }
                 },
                 customClass: {
                     popup: 'swal2-popup-custom',
