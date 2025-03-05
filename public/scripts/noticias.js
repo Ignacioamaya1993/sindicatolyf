@@ -94,7 +94,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 // Crear el HTML para cada noticia
                 noticiaElement.innerHTML = `
                     <h3 class="titulo-noticia" data-id="${noticia.id}">${noticia.titulo || "Sin título"}</h3>
-                    <p>${noticia.shortext || "Sin descripción"}</p>
                     ${noticia.imagen ? `<img src="${noticia.imagen}" alt="Imagen de la noticia">` : ""}
                 `;
 

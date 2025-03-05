@@ -50,9 +50,8 @@
 }
 
 .noticias-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 columnas */
     gap: 20px;
     padding: 20px;
     margin-top: 20px;
@@ -68,7 +67,7 @@
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.25);
     padding: 15px;
     text-align: center;
-    transition: transform 0.2s;
+    transition: transform 0.4s;
     cursor: pointer;
 }
 

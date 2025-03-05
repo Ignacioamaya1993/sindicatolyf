@@ -13,5 +13,16 @@ service cloud.firestore {
       allow read: if true;  // ✅ Cualquier usuario puede leer la información de profesionales
       allow write: if request.auth != null && request.auth.token.role == "admin"; // ✅ Solo administradores pueden agregar/modificar profesionales
     }
+
+        // Permite leer solo si está autenticado
+    match /usuarios/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Permitir escritura solo si es el propio usuario quien modifica su doc
+    match /usuarios/{userId} {
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
   }
 }

@@ -43,10 +43,9 @@
     transform: translateY(1px);
 }
 
-
 .noticias-container {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr); /* 4 columnas */
     gap: 20px;
     padding: 20px;
     margin-top: 20px;
