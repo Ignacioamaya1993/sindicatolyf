@@ -74,13 +74,25 @@ async function addProfessional() {
                 especialidad: document.getElementById('swal-especialidad').value.trim(),
                 direccion: document.getElementById('swal-direccion').value.trim(),
                 localidad: document.getElementById('swal-localidad').value.trim(),
-                telefono: phones.length > 0 ? phones : []  // Asegurar que siempre sea un array
+                telefono: phones.length > 0 ? phones : null
             };
         }
     });
 
-    if (formValues.apenom && formValues.especialidad && formValues.direccion && formValues.localidad) {
+    if (formValues && formValues.apenom && formValues.especialidad && formValues.direccion && formValues.localidad) {
         try {
+            // Verificar si ya existe el profesional con esa especialidad
+            const querySnapshot = await getDocs(collection(db, "profesionales"));
+            const exists = querySnapshot.docs.some(doc => {
+                const data = doc.data();
+                return data.apenom === formValues.apenom && data.especialidad === formValues.especialidad;
+            });
+
+            if (exists) {
+                Swal.fire("Error", "El profesional con esta especialidad ya existe", "error");
+                return;
+            }
+
             await addDoc(collection(db, "profesionales"), formValues);
             Swal.fire("Éxito", "Profesional agregado", "success");
             loadProfessionals();
@@ -91,6 +103,7 @@ async function addProfessional() {
         Swal.fire("Error", "Todos los campos son obligatorios excepto el teléfono", "error");
     }
 }
+
 
 // Función para agregar un campo de teléfono dinámico
 function addPhoneField() {
