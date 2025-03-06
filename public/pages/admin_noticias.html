@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrar Noticias</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/admin_noticias.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Administrar Noticias</h1>
+
+        <!-- Botón para agregar una nueva noticia -->
+        <button id="add-news-btn">Agregar Noticia</button>
+
+        <!-- Contenedor de las noticias -->
+        <div id="news-container" class="news-container">
+            <!-- Las noticias se cargarán aquí -->
+        </div>
+    </div>
+
+    <!-- Modal para agregar/editar noticia -->
+    <div id="news-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title">Agregar Noticia</h2>
+            <form id="news-form">
+                <input type="hidden" id="news-id">
+                <label for="news-title">Título:</label>
+                <input type="text" id="news-title" required>
+
+                <label for="news-content">Contenido:</label>
+                <textarea id="news-content" required></textarea>
+
+                <button type="submit" id="submit-btn">Guardar</button>
+                <button type="button" id="close-modal-btn">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="firebase.js"></script>
+    <script type="module" src="../scripts/admin_noticias.js"></script>
+</body>
+</html>
+    

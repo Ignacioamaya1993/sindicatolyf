@@ -14,14 +14,38 @@
 
     <header>
         <div class="header-container">
-            <h1>Administración - Cartilla Médica</h1>
+            <div class="logolyf">
+                <a href="admin-panel.html">
+                    <img src="../assets/logos/logolyf.png" alt="Logo Luz y Fuerza">
+                </a>            
+                </div>
+            <nav>
+                <ul>
+                    <li><a href="admin-panel.html">Panel Administrador</a></li>
+                    <li><a href="noticias.html">Administrar Noticias</a></li>
+                    <li><a href="admin_cartillamedica.html">Administrar Cartilla Medica</a></li>
+                </ul>
+            </nav>
+            
+            <div class="logoosfatlyf">
+                <a href="https://osfatlyf.org/" target="_blank">
+                    <img src="../assets/logos/osfatlyf.png" alt="Logo osfatlyf">
+                </a>
+            </div>
         </div>
     </header>
 
     <div class="container">
+        <!-- Controles de búsqueda y filtro -->
         <div class="controls">
             <button id="addProfessional">Agregar Profesional</button>
             <input type="text" id="search" placeholder="Buscar por nombre">
+            <select id="categoryFilter" class="styled-select">
+                <option value="Todas">Todas las categorías</option>
+            </select>
+            <input type="file" id="fileInput" accept=".xlsx, .xls">
+            <button id="uploadExcel">Cargar Excel</button>
+
         </div>
 
         <table>
@@ -40,7 +64,26 @@
     </div>
 
     <footer>
-        <p>&copy; 2025 Sindicato Luz y Fuerza de Olavarría. Todos los derechos reservados.</p>
+        <div class="footer-container">
+            <div class="footer-info">
+                <p>&copy; 2025 Sindicato Luz y Fuerza de Olavarria. Todos los derechos reservados.</p>
+                <p>Maipú 2150 - Tel: 423213 / 430825</p>
+            </div>
+            <div class="footer-social">
+                <a href="https://www.facebook.com/luzyfuerzaolavarria" target="_blank" class="social-icon" aria-label="Facebook">
+                    <i class="fab fa-facebook"></i>
+                </a>
+                <a href="https://www.instagram.com/luzyfuerzaolavarria" target="_blank" class="social-icon" aria-label="Instagram">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="https://wa.me/5492284692114" target="_blank" class="social-icon" aria-label="WhatsApp">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+            </div>
+            <div class="footer-design">
+                <p>Design by Ignacio Amaya</p>
+            </div>
+        </div>
     </footer>
 
     <script type="module" src="../scripts/admin_cartillamedica.js"></script>

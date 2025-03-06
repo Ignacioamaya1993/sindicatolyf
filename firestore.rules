@@ -5,7 +5,9 @@ service cloud.firestore {
     // Reglas para la colección "noticias"
     match /noticias/{docId} {
       allow read: if true;  // ✅ Cualquiera puede leer noticias
-      allow write: if request.auth != null && request.auth.token.role == "admin"; // ✅ Solo administradores pueden escribir
+      allow create, update, delete: if request.auth != null;  // Solo usuarios autenticados pueden agregar, editar o eliminar
+
+
     }
     
     // Reglas para la colección "profesionales"
@@ -17,11 +19,7 @@ service cloud.firestore {
         // Permite leer solo si está autenticado
     match /usuarios/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // Permitir escritura solo si es el propio usuario quien modifica su doc
-    match /usuarios/{userId} {
       allow write: if request.auth != null && request.auth.uid == userId;
-    }    
+    }  
   }
 }
