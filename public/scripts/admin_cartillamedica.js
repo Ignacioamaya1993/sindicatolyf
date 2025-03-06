@@ -3,10 +3,13 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
 const auth = getAuth();
-let professionals = [];
-const professionalList = document.getElementById('professionalList');
+const professionalList = document.getElementById("professionalList");
+const searchInput = document.getElementById("search");
+const addProfessionalBtn = document.getElementById("addProfessional");
 
-// Cargar profesionales desde Firestore
+let professionals = [];
+
+// **🔹 Cargar profesionales desde Firestore**
 async function loadProfessionals() {
     try {
         const querySnapshot = await getDocs(collection(db, "profesionales"));
@@ -17,111 +20,156 @@ async function loadProfessionals() {
     }
 }
 
-// Renderizar la tabla
+// **🔹 Renderizar la tabla con profesionales**
 function renderProfessionals() {
-    professionalList.innerHTML = '';
+    professionalList.innerHTML = "";
     professionals.forEach(prof => {
-        const telefonos = Array.isArray(prof.telefono) ? prof.telefono.join(" / ") : (prof.telefono || '');
-        const row = document.createElement('tr');
+        const telefonos = Array.isArray(prof.telefono) ? prof.telefono.join(" / ") : prof.telefono || "";
+        const row = document.createElement("tr");
         row.innerHTML = `
-            <td>${prof.especialidad || ''}</td>
-            <td>${prof.apenom || ''}</td>
-            <td>${prof.direccion || ''}</td>
-            <td>${prof.localidad || ''}</td>
+            <td>${prof.especialidad || ""}</td>
+            <td>${prof.apenom || ""}</td>
+            <td>${prof.direccion || ""}</td>
+            <td>${prof.localidad || ""}</td>
             <td>${telefonos}</td>
             <td class="action-buttons">
-                <button class="edit" onclick="editProfessional('${prof.id}')">Editar</button>
-                <button class="delete" onclick="deleteProfessional('${prof.id}')">Eliminar</button>
+                <button class="edit" onclick="editProfessional('${prof.id}')"><i class="fas fa-edit"></i></button>
+                <button class="delete" onclick="deleteProfessional('${prof.id}')"><i class="fas fa-trash-alt"></i></button>
             </td>
         `;
         professionalList.appendChild(row);
     });
 }
 
-// Agregar un profesional con múltiples teléfonos
+// **🔹 Función para agregar un profesional**
 async function addProfessional() {
-    if (!auth.currentUser) {
-        Swal.fire("Error", "Debes iniciar sesión para agregar un profesional", "error");
-        return;
-    }
-
     const { value: formValues } = await Swal.fire({
         title: "Agregar Profesional",
         html: `
-            <input id="swal-apenom" class="swal2-input" placeholder="Nombre y apellido" required>
-            <input id="swal-especialidad" class="swal2-input" placeholder="Especialidad" required>
-            <input id="swal-direccion" class="swal2-input" placeholder="Dirección" required>
-            <input id="swal-localidad" class="swal2-input" placeholder="Localidad" required>
-            <div id="phoneContainer">
-                <div class="phone-field">
-                    <input type="text" class="swal2-input phone-input" placeholder="Teléfono">
-                    <button type="button" class="add-phone">+</button>
-                </div>
-            </div>
+            <input id="swal-apenom" class="swal2-input" placeholder="Nombre y apellido">
+            <input id="swal-especialidad" class="swal2-input" placeholder="Especialidad">
+            <input id="swal-direccion" class="swal2-input" placeholder="Dirección">
+            <input id="swal-localidad" class="swal2-input" placeholder="Localidad">
+            <input id="swal-telefono" class="swal2-input" placeholder="Teléfono (separados por coma)">
         `,
-        didOpen: () => {
-            document.querySelector(".add-phone").addEventListener("click", addPhoneField);
-        },
         showCancelButton: true,
         confirmButtonText: "Guardar",
         preConfirm: () => {
-            const phones = [...document.querySelectorAll(".phone-input")]
-                .map(input => input.value.trim())
-                .filter(phone => phone !== ""); // Filtrar vacíos
-
             return {
                 apenom: document.getElementById('swal-apenom').value.trim(),
                 especialidad: document.getElementById('swal-especialidad').value.trim(),
                 direccion: document.getElementById('swal-direccion').value.trim(),
                 localidad: document.getElementById('swal-localidad').value.trim(),
-                telefono: phones.length > 0 ? phones : null
+                telefono: document.getElementById('swal-telefono').value.trim().split(",").map(t => t.trim()).filter(Boolean)
             };
         }
     });
 
-    if (formValues && formValues.apenom && formValues.especialidad && formValues.direccion && formValues.localidad) {
+    if (formValues) {
         try {
-            // Verificar si ya existe el profesional con esa especialidad
-            const querySnapshot = await getDocs(collection(db, "profesionales"));
-            const exists = querySnapshot.docs.some(doc => {
-                const data = doc.data();
-                return data.apenom === formValues.apenom && data.especialidad === formValues.especialidad;
-            });
-
-            if (exists) {
-                Swal.fire("Error", "El profesional con esta especialidad ya existe", "error");
-                return;
-            }
-
             await addDoc(collection(db, "profesionales"), formValues);
             Swal.fire("Éxito", "Profesional agregado", "success");
             loadProfessionals();
         } catch (error) {
             console.error("Error al agregar profesional:", error);
         }
-    } else {
-        Swal.fire("Error", "Todos los campos son obligatorios excepto el teléfono", "error");
     }
 }
 
+// **🔹 Función para editar un profesional**
+async function editProfessional(id) {
+    const professional = professionals.find(prof => prof.id === id);
+    if (!professional) {
+        Swal.fire("Error", "No se encontró el profesional", "error");
+        return;
+    }
 
-// Función para agregar un campo de teléfono dinámico
-function addPhoneField() {
-    const phoneContainer = document.getElementById("phoneContainer");
-    const div = document.createElement("div");
-    div.classList.add("phone-field");
-    div.innerHTML = `
-        <input type="text" class="swal2-input phone-input" placeholder="Teléfono">
-        <button type="button" class="remove-phone">-</button>
-    `;
-    phoneContainer.appendChild(div);
+    const { value: formValues } = await Swal.fire({
+        title: "Editar Profesional",
+        html: `
+            <input id="swal-apenom" class="swal2-input" placeholder="Nombre y apellido" value="${professional.apenom || ''}">
+            <input id="swal-especialidad" class="swal2-input" placeholder="Especialidad" value="${professional.especialidad || ''}">
+            <input id="swal-direccion" class="swal2-input" placeholder="Dirección" value="${professional.direccion || ''}">
+            <input id="swal-localidad" class="swal2-input" placeholder="Localidad" value="${professional.localidad || ''}">
+            <input id="swal-telefono" class="swal2-input" placeholder="Teléfono (separados por coma)" value="${(professional.telefono || []).join(', ')}">
+            <p id="error-message" class="error-message">Todos los campos son obligatorios (excepto teléfono)</p>
+        `,
+        showCancelButton: true,
+        confirmButtonText: "Actualizar",
+        didOpen: () => {
+            // Detectar inputs y agregar eventos de validación
+            const inputs = document.querySelectorAll(".swal2-input");
+            inputs.forEach(input => {
+                input.addEventListener("input", () => {
+                    if (input.value.trim() === "" && input.id !== "swal-telefono") {
+                        input.classList.add("input-error");
+                    } else {
+                        input.classList.remove("input-error");
+                    }
+                });
+            });
+        },
+        preConfirm: () => {
+            const apenom = document.getElementById('swal-apenom').value.trim();
+            const especialidad = document.getElementById('swal-especialidad').value.trim();
+            const direccion = document.getElementById('swal-direccion').value.trim();
+            const localidad = document.getElementById('swal-localidad').value.trim();
+            const telefono = document.getElementById('swal-telefono').value.trim().split(",").map(t => t.trim()).filter(Boolean);
 
-    div.querySelector(".remove-phone").addEventListener("click", function () {
-        div.remove();
+            // Verificar que todos los campos obligatorios estén llenos
+            if (!apenom || !especialidad || !direccion || !localidad) {
+                document.getElementById("error-message").style.display = "block";
+                return false;
+            }
+
+            // Verificar si hubo cambios en los datos
+            const sinCambios = (
+                apenom === professional.apenom &&
+                especialidad === professional.especialidad &&
+                direccion === professional.direccion &&
+                localidad === professional.localidad &&
+                JSON.stringify(telefono) === JSON.stringify(professional.telefono)
+            );
+
+            if (sinCambios) {
+                Swal.fire("Sin cambios", "No realizaste modificaciones.", "info");
+                return false;
+            }
+
+            return { apenom, especialidad, direccion, localidad, telefono };
+        }
     });
+
+    if (formValues) {
+        try {
+            await updateDoc(doc(db, "profesionales", id), formValues);
+            Swal.fire("Éxito", "Profesional actualizado", "success");
+            loadProfessionals();
+        } catch (error) {
+            console.error("Error al actualizar profesional:", error);
+        }
+    }
 }
 
-// Eliminar un profesional
+// **🔹 Función para validar los campos**
+function validateFields() {
+    const inputs = document.querySelectorAll(".swal2-input");
+    let allValid = true;
+
+    inputs.forEach(input => {
+        if (input.placeholder !== "Teléfono (opcional)" && input.value.trim() === "") {
+            input.style.border = "2px solid red";
+            allValid = false;
+        } else {
+            input.style.border = "";
+        }
+    });
+
+    const confirmButton = document.querySelector(".swal2-confirm");
+    confirmButton.disabled = !allValid;
+}
+
+// **🔹 Función para eliminar un profesional**
 async function deleteProfessional(id) {
     const confirmDelete = await Swal.fire({
         title: "¿Estás seguro?",
@@ -143,6 +191,33 @@ async function deleteProfessional(id) {
     }
 }
 
-// Inicializar eventos
-document.getElementById('addProfessional').addEventListener('click', addProfessional);
-document.addEventListener('DOMContentLoaded', loadProfessionals);
+// **🔹 Función para filtrar profesionales**
+searchInput.addEventListener("input", () => {
+    const searchTerm = searchInput.value.toLowerCase();
+    const filteredProfessionals = professionals.filter(prof => prof.apenom.toLowerCase().includes(searchTerm));
+    professionalList.innerHTML = "";
+    filteredProfessionals.forEach(prof => {
+        const telefonos = Array.isArray(prof.telefono) ? prof.telefono.join(" / ") : prof.telefono || "";
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${prof.especialidad || ""}</td>
+            <td>${prof.apenom || ""}</td>
+            <td>${prof.direccion || ""}</td>
+            <td>${prof.localidad || ""}</td>
+            <td>${telefonos}</td>
+            <td class="action-buttons">
+                <button class="edit" onclick="editProfessional('${prof.id}')"><i class="fas fa-edit"></i></button>
+                <button class="delete" onclick="deleteProfessional('${prof.id}')"><i class="fas fa-trash-alt"></i></button>
+            </td>
+        `;
+        professionalList.appendChild(row);
+    });
+});
+
+// **🔹 Inicializar eventos**
+addProfessionalBtn.addEventListener("click", addProfessional);
+document.addEventListener("DOMContentLoaded", loadProfessionals);
+
+// **🔹 Hacer funciones accesibles en `window`**
+window.editProfessional = editProfessional;
+window.deleteProfessional = deleteProfessional;
