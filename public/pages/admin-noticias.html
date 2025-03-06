@@ -5,23 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administrar Noticias</title>
     <link rel="stylesheet" href="../styles/global.css">
-    <link rel="stylesheet" href="../styles/admin_noticias.css">
+    <link rel="stylesheet" href="../styles/admin-noticias.css">
+    
+    <!-- Cargar TinyMCE desde la carpeta local -->
+    <script src="../tinymce/tinymce.min.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Administrar Noticias</h1>
 
-        <!-- Botón para agregar una nueva noticia -->
         <button id="add-news-btn">Agregar Noticia</button>
 
-        <!-- Contenedor de las noticias -->
         <div id="news-container" class="news-container">
             <!-- Las noticias se cargarán aquí -->
         </div>
     </div>
 
-    <!-- Modal para agregar/editar noticia -->
-    <div id="news-modal" class="modal">
+    <div id="news-modal" style="display: none;">
         <div class="modal-content">
             <h2 id="modal-title">Agregar Noticia</h2>
             <form id="news-form">
@@ -38,8 +38,16 @@
         </div>
     </div>
 
-    <script type="module" src="firebase.js"></script>
-    <script type="module" src="../scripts/admin_noticias.js"></script>
+    <script type="module" src="../scripts/firebaseConfig.js"></script>
+    <script type="module" src="../scripts/admin-noticias.js"></script>
+    
+    <script>
+        // Inicializar TinyMCE
+        tinymce.init({
+            selector: '#news-content',  // El selector para el área de texto que usará TinyMCE
+            plugins: 'advlist autolink lists link image charmap print preview anchor',
+            toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | removeformat'
+        });
+    </script>
 </body>
 </html>
-    

@@ -1,6 +1,7 @@
-import { db } from "./firebaseConfig.js";
-import { getFirestore, collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { db, storage } from "./firebaseConfig.js";
+import { collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 
 const auth = getAuth();
 const addNewsBtn = document.getElementById('add-news-btn');
@@ -13,6 +14,7 @@ const submitBtn = document.getElementById('submit-btn');
 const newsIdInput = document.getElementById('news-id');
 const newsTitleInput = document.getElementById('news-title');
 const newsContentInput = document.getElementById('news-content');
+const newsImageInput = document.getElementById('news-image');
 
 // Cargar todas las noticias
 const loadNews = async () => {
@@ -24,7 +26,7 @@ const loadNews = async () => {
 
         // Obtener los datos de la noticia
         const title = news.titulo || "Sin título"; // Título de la noticia
-        const shortext = news.shortext || "Contenido no disponible"; // Descripción breve o resumen
+        const content = news.descripcion || "Contenido no disponible"; // Descripción
         const categoria = news.categoria || "Categoría no disponible"; // Categoría de la noticia
         const image = news.imagen || ""; // Imagen de la noticia
 
@@ -34,7 +36,7 @@ const loadNews = async () => {
         newsCard.innerHTML = `
             <h3>${title}</h3>
             <p><strong>Categoría:</strong> ${categoria}</p>
-            <p><strong>Resumen:</strong> ${shortext.slice(0, 50)}...</p>
+            <p><strong>Contenido:</strong> ${content.slice(0, 50)}...</p>
             ${image ? `<img src="${image}" alt="Imagen de la noticia">` : ""}
             <button class="edit-btn" data-id="${doc.id}">Editar</button>
             <button class="delete-btn" data-id="${doc.id}">Eliminar</button>
@@ -50,6 +52,7 @@ addNewsBtn.addEventListener('click', () => {
     newsIdInput.value = ''; // Limpiar los campos
     newsTitleInput.value = '';
     newsContentInput.value = '';
+    newsImageInput.value = '';  // Limpiar el campo de imagen
     submitBtn.textContent = 'Guardar';
 });
 
@@ -63,23 +66,25 @@ newsForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const title = newsTitleInput.value;
     const content = newsContentInput.value;
+    const imageFile = newsImageInput.files[0]; // Obtenemos el archivo de la imagen
+
+    let imageUrl = ''; // Inicializamos la variable de imagen
+
+    // Subir imagen a Firebase Storage si hay una imagen seleccionada
+    if (imageFile) {
+        const imageRef = ref(storage, `news-images/${imageFile.name}`);
+        await uploadBytes(imageRef, imageFile);
+        imageUrl = await getDownloadURL(imageRef); // Obtener la URL de la imagen subida
+    }
 
     if (newsIdInput.value) {
         // Editar noticia
         const newsRef = doc(db, 'noticias', newsIdInput.value);
-        await updateDoc(newsRef, { 
-            titulo: title,      // Corregido a 'titulo'
-            descripcion: content // Corregido a 'descripcion'
-        });
+        await updateDoc(newsRef, { titulo: title, descripcion: content, imagen: imageUrl });
         Swal.fire('Éxito', 'Noticia actualizada', 'success');
     } else {
         // Agregar nueva noticia
-        await addDoc(collection(db, 'noticias'), { 
-            titulo: title,       // Corregido a 'titulo'
-            descripcion: content, // Corregido a 'descripcion'
-            shortext: content.slice(0, 50), // Puede ser útil agregar un resumen corto
-            categoria: "General"  // Puedes ajustar la categoría según necesites
-        });
+        await addDoc(collection(db, 'noticias'), { titulo: title, descripcion: content, imagen: imageUrl });
         Swal.fire('Éxito', 'Noticia agregada', 'success');
     }
 
@@ -97,8 +102,9 @@ newsContainer.addEventListener('click', async (e) => {
 
         modalTitle.textContent = 'Editar Noticia';
         newsIdInput.value = docId;
-        newsTitleInput.value = news.titulo;  // Aquí usamos 'titulo' en lugar de 'title'
-        newsContentInput.value = news.descripcion;  // Usamos 'descripcion' en lugar de 'content'
+        newsTitleInput.value = news.titulo;
+        newsContentInput.value = news.descripcion;
+        newsImageInput.value = '';  // Limpiar el campo de imagen
         submitBtn.textContent = 'Actualizar';
 
         newsModal.style.display = 'flex';

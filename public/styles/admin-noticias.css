@@ -103,16 +103,22 @@ body {
     width: 400px;
 }
 
-#news-modal h2 {
-    margin-top: 0;
+/* Título del modal */
+#modal-title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    color: #333;
 }
 
+/* Estilo para los campos del formulario */
 #news-modal input, #news-modal textarea {
     width: 100%;
     padding: 10px;
     margin: 10px 0;
     border: 1px solid #ccc;
     border-radius: 5px;
+    font-size: 1em;
 }
 
 /* Botón de cierre */
@@ -129,7 +135,7 @@ body {
     color: #333;
 }
 
-/* Estilo para el modal en el formulario */
+/* Estilo para el botón de guardar */
 #submit-btn {
     background-color: #28a745;
     color: white;
@@ -146,7 +152,22 @@ body {
     background-color: #218838;
 }
 
-#modal-title {
-    text-align: center;
-    margin-bottom: 20px;
+/* Estilo para los campos del formulario */
+#news-modal input[type="file"] {
+    padding: 5px;
+    border: 1px solid #ccc;
+    font-size: 1em;
+}
+
+/* Ajustes para el formulario al editar */
+#news-modal .edit-mode #modal-title {
+    color: #007bff;  /* Color azul para el título de edición */
+}
+
+#news-modal .edit-mode #submit-btn {
+    background-color: #ff9800;
+}
+
+#news-modal .edit-mode #submit-btn:hover {
+    background-color: #e68900;
 }
