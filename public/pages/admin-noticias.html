@@ -16,6 +16,30 @@
     <script src="../tinymce/tinymce.min.js"></script>
 </head>
 <body>
+
+    <header>
+        <div class="header-container">
+            <div class="logolyf">
+                <a href="admin-panel.html">
+                    <img src="../assets/logos/logolyf.png" alt="Logo Luz y Fuerza">
+                </a>            
+                </div>
+            <nav>
+                <ul>
+                    <li><a href="admin-panel.html">Panel Administrador</a></li>
+                    <li><a href="noticias.html">Administrar Noticias</a></li>
+                    <li><a href="admin-cartillamedica.html">Administrar Cartilla Medica</a></li>
+                </ul>
+            </nav>
+            
+            <div class="logoosfatlyf">
+                <a href="https://osfatlyf.org/" target="_blank">
+                    <img src="../assets/logos/osfatlyf.png" alt="Logo osfatlyf">
+                </a>
+            </div>
+        </div>
+    </header>
+
     <div class="container">
         <h1>Administrar Noticias</h1>
 
@@ -28,24 +52,49 @@
 
     <div id="news-modal" style="display: none;">
         <div class="modal-content">
+            <button id="close-modal-btn">X</button>
             <h2 id="modal-title">Agregar Noticia</h2>
             <form id="news-form">
                 <label for="news-image">Imagen:</label>
                 <button type="button" id="upload-image-btn">Subir Imagen</button>
-                <input type="hidden" id="news-image-url"> <!-- Campo oculto para almacenar la URL de la imagen -->
-
+                <input type="hidden" id="news-image-url"><br><br>
                 <input type="hidden" id="news-id">
                 <label for="news-title">Título:</label>
                 <input type="text" id="news-title" required>
-
+                
+                <label for="news-category">Categoría:</label>
+                <select id="news-category"></select><br><br>
+                
                 <label for="news-content">Contenido:</label>
                 <textarea id="news-content"></textarea>
-
+    
                 <button type="submit" id="submit-btn">Guardar</button>
-                <button type="button" id="close-modal-btn">Cancelar</button>
             </form>
         </div>
-    </div>
+    </div>    
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-info">
+                <p>&copy; 2025 Sindicato Luz y Fuerza de Olavarria. Todos los derechos reservados.</p>
+                <p>Maipú 2150 - Tel: 423213 / 430825</p>
+            </div>
+            <div class="footer-social">
+                <a href="https://www.facebook.com/luzyfuerzaolavarria" target="_blank" class="social-icon" aria-label="Facebook">
+                    <i class="fab fa-facebook"></i>
+                </a>
+                <a href="https://www.instagram.com/luzyfuerzaolavarria" target="_blank" class="social-icon" aria-label="Instagram">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="https://wa.me/5492284692114" target="_blank" class="social-icon" aria-label="WhatsApp">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+            </div>
+            <div class="footer-design">
+                <p>Design by Ignacio Amaya</p>
+            </div>
+        </div>
+    </footer>
 
     <script type="module" src="../scripts/firebaseConfig.js"></script>
     <script type="module" src="../scripts/admin-noticias.js"></script>
