@@ -6,6 +6,11 @@
     <title>Administrar Noticias</title>
     <link rel="stylesheet" href="../styles/global.css">
     <link rel="stylesheet" href="../styles/admin-noticias.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    
+    <!-- Cargar el script de Cloudinary -->
+    <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
     
     <!-- Cargar TinyMCE desde la carpeta local -->
     <script src="../tinymce/tinymce.min.js"></script>
@@ -25,12 +30,16 @@
         <div class="modal-content">
             <h2 id="modal-title">Agregar Noticia</h2>
             <form id="news-form">
+                <label for="news-image">Imagen:</label>
+                <button type="button" id="upload-image-btn">Subir Imagen</button>
+                <input type="hidden" id="news-image-url"> <!-- Campo oculto para almacenar la URL de la imagen -->
+
                 <input type="hidden" id="news-id">
                 <label for="news-title">Título:</label>
                 <input type="text" id="news-title" required>
 
                 <label for="news-content">Contenido:</label>
-                <textarea id="news-content" required></textarea>
+                <textarea id="news-content"></textarea>
 
                 <button type="submit" id="submit-btn">Guardar</button>
                 <button type="button" id="close-modal-btn">Cancelar</button>
@@ -44,9 +53,50 @@
     <script>
         // Inicializar TinyMCE
         tinymce.init({
-            selector: '#news-content',  // El selector para el área de texto que usará TinyMCE
+            selector: '#news-content',
             plugins: 'advlist autolink lists link image charmap print preview anchor',
             toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | removeformat'
+        });
+
+        // Configuración del widget de Cloudinary
+        const cloudinaryWidget = cloudinary.createUploadWidget({
+            cloudName: 'ddadtpm2o',
+            uploadPreset: 'ml_default',
+            multiple: false,
+            maxFiles: 1
+        }, (error, result) => {
+            if (result.event === "success") {
+                console.log("Imagen subida correctamente:", result.info);
+                const imageUrl = result.info.secure_url;  // URL de la imagen subida
+                document.getElementById('news-image-url').value = imageUrl;  // Almacena la URL de la imagen en el campo oculto
+            } else if (error) {
+                console.error("Error al subir la imagen:", error);
+            }
+        });
+
+        // Mostrar el widget de Cloudinary cuando el botón de "Subir Imagen" es presionado
+        document.getElementById("upload-image-btn").addEventListener("click", function() {
+            cloudinaryWidget.open();
+        });
+
+        // Manejo del formulario de noticias
+        document.getElementById('news-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('news-title').value;
+            const content = tinymce.get("news-content").getContent();
+            const imageUrl = document.getElementById('news-image-url').value;
+
+            const newsId = document.getElementById('news-id').value;
+
+            if (newsId) {
+                // Editar noticia
+                console.log('Editar noticia', { title, content, imageUrl });
+            } else {
+                // Agregar nueva noticia
+                console.log('Nueva noticia', { title, content, imageUrl });
+            }
+
+            // Aquí podrías guardar la noticia en Firebase o en otra base de datos
         });
     </script>
 </body>

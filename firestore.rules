@@ -1,34 +1,22 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Reglas para la colección "noticias"
+
+    // 📌 Reglas para la colección "noticias"
     match /noticias/{docId} {
       allow read: if true;  // ✅ Cualquiera puede leer noticias
-      allow create, update, delete: if request.auth != null;  // Solo usuarios autenticados pueden agregar, editar o eliminar
-
-
+      allow create, update, delete: if request.auth != null;  // 🔒 Solo usuarios autenticados pueden escribir
     }
-    
-    // Reglas para la colección "profesionales"
+
+    // 📌 Reglas para la colección "profesionales"
     match /profesionales/{docId} {
-      allow read;
-      allow write: if request.auth != null;  // Solo usuarios autenticados pueden escribir
+      allow read: if true;  // ✅ Cualquiera puede leer profesionales
+      allow write: if request.auth != null;  // 🔒 Solo usuarios autenticados pueden escribir
     }
 
-        // Permite leer solo si está autenticado
+    // 📌 Reglas para la colección "usuarios"
     match /usuarios/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.uid == userId;
-    }  
-
-    service firebase.storage {
-  match /b/{bucket}/o {
-    match /{allPaths=**} {
-      allow read, write: if false;
+      allow read, write: if request.auth != null && request.auth.uid == userId;  // 🔒 Solo el dueño de la cuenta puede leer/escribir
     }
-  }
-}
-
   }
 }

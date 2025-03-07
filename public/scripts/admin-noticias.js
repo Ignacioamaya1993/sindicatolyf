@@ -1,7 +1,10 @@
-import { db, storage } from "./firebaseConfig.js";
+import { db } from "./firebaseConfig.js";
 import { collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
+
+// Esta es la URL de tu cuenta de Cloudinary
+const cloudinaryUrl = 'https://api.cloudinary.com/v1_1/ddadtpm2o/image/upload';
+const cloudinaryPreset = 'ml_default'; // El preset de carga de imágenes que debes generar en Cloudinary
 
 const auth = getAuth();
 const addNewsBtn = document.getElementById('add-news-btn');
@@ -13,8 +16,18 @@ const modalTitle = document.getElementById('modal-title');
 const submitBtn = document.getElementById('submit-btn');
 const newsIdInput = document.getElementById('news-id');
 const newsTitleInput = document.getElementById('news-title');
-const newsContentInput = document.getElementById('news-content');
 const newsImageInput = document.getElementById('news-image');
+
+// ✅ Esperar a que TinyMCE se inicialice antes de cualquier acción
+const waitForTinyMCE = () => {
+    return new Promise(resolve => {
+        if (tinymce.get("news-content")) {
+            resolve();
+        } else {
+            setTimeout(() => resolve(waitForTinyMCE()), 100);
+        }
+    });
+};
 
 // Cargar todas las noticias
 const loadNews = async () => {
@@ -25,10 +38,10 @@ const loadNews = async () => {
         const news = doc.data();
 
         // Obtener los datos de la noticia
-        const title = news.titulo || "Sin título"; // Título de la noticia
-        const content = news.descripcion || "Contenido no disponible"; // Descripción
-        const categoria = news.categoria || "Categoría no disponible"; // Categoría de la noticia
-        const image = news.imagen || ""; // Imagen de la noticia
+        const title = news.titulo || "Sin título";
+        const content = news.descripcion || "Contenido no disponible";
+        const categoria = news.categoria || "Categoría no disponible";
+        const image = news.imagen || "";
 
         // Crear la tarjeta de la noticia
         const newsCard = document.createElement('div');
@@ -46,12 +59,16 @@ const loadNews = async () => {
 };
 
 // Abrir el modal para agregar una noticia
-addNewsBtn.addEventListener('click', () => {
+addNewsBtn.addEventListener('click', async () => {
     modalTitle.textContent = 'Agregar Noticia';
     newsModal.style.display = 'flex';
     newsIdInput.value = ''; // Limpiar los campos
     newsTitleInput.value = '';
-    newsContentInput.value = '';
+
+    // ✅ Esperar a que TinyMCE esté listo antes de limpiar el contenido
+    await waitForTinyMCE();
+    tinymce.get("news-content").setContent("");
+
     newsImageInput.value = '';  // Limpiar el campo de imagen
     submitBtn.textContent = 'Guardar';
 });
@@ -64,32 +81,32 @@ closeModalBtn.addEventListener('click', () => {
 // Agregar o editar noticia
 newsForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const title = newsTitleInput.value;
-    const content = newsContentInput.value;
-    const imageFile = newsImageInput.files[0]; // Obtenemos el archivo de la imagen
+    
+    const title = newsTitleInput.value.trim();
+    const content = tinymce.get("news-content").getContent().trim(); // ✅ Obtener y limpiar contenido
 
-    let imageUrl = ''; // Inicializamos la variable de imagen
-
-    // Subir imagen a Firebase Storage si hay una imagen seleccionada
-    if (imageFile) {
-        const imageRef = ref(storage, `news-images/${imageFile.name}`);
-        await uploadBytes(imageRef, imageFile);
-        imageUrl = await getDownloadURL(imageRef); // Obtener la URL de la imagen subida
+    // ✅ Validar manualmente si TinyMCE está vacío
+    if (!content) {
+        Swal.fire('Error', 'El contenido no puede estar vacío', 'error');
+        return; // 🚫 Detiene el envío si está vacío
     }
 
+    const imageUrl = document.getElementById('news-image-url').value;
+
     if (newsIdInput.value) {
-        // Editar noticia
+        // ✅ Editar noticia
         const newsRef = doc(db, 'noticias', newsIdInput.value);
         await updateDoc(newsRef, { titulo: title, descripcion: content, imagen: imageUrl });
         Swal.fire('Éxito', 'Noticia actualizada', 'success');
     } else {
-        // Agregar nueva noticia
+        // ✅ Agregar nueva noticia
         await addDoc(collection(db, 'noticias'), { titulo: title, descripcion: content, imagen: imageUrl });
         Swal.fire('Éxito', 'Noticia agregada', 'success');
     }
 
+    // ✅ Cerrar el modal y recargar noticias
     newsModal.style.display = 'none';
-    loadNews(); // Recargar noticias
+    loadNews();
 });
 
 // Editar una noticia
@@ -102,11 +119,13 @@ newsContainer.addEventListener('click', async (e) => {
 
         modalTitle.textContent = 'Editar Noticia';
         newsIdInput.value = docId;
-        newsTitleInput.value = news.titulo;
-        newsContentInput.value = news.descripcion;
-        newsImageInput.value = '';  // Limpiar el campo de imagen
-        submitBtn.textContent = 'Actualizar';
+        newsTitleInput.value = news.titulo || "";
 
+        // ✅ Esperar a que TinyMCE esté listo antes de modificar su contenido
+        await waitForTinyMCE();
+        tinymce.get("news-content").setContent(news.descripcion || "");
+
+        submitBtn.textContent = 'Actualizar';
         newsModal.style.display = 'flex';
     }
 
@@ -116,7 +135,7 @@ newsContainer.addEventListener('click', async (e) => {
         const docRef = doc(db, 'noticias', docId);
         await deleteDoc(docRef);
         Swal.fire('Éxito', 'Noticia eliminada', 'success');
-        loadNews(); // Recargar noticias
+        loadNews();
     }
 });
 
