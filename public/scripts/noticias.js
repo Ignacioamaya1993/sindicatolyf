@@ -74,39 +74,40 @@ document.addEventListener("DOMContentLoaded", async () => {
             querySnapshot.forEach((doc) => {
                 const noticia = doc.data();
 
-                // Eliminar acentos y convertir a minúsculas tanto el título como el shortext y el filtro
-                const tituloLower = eliminarAcentos(noticia.titulo.toLowerCase());
-                const shortextLower = eliminarAcentos(noticia.shortext.toLowerCase());
-                const filtroTituloLower = eliminarAcentos(filtroTitulo.toLowerCase());
+            // Eliminar acentos y convertir a minúsculas tanto el título como el filtro
+            const tituloLower = noticia.titulo ? eliminarAcentos(noticia.titulo.toLowerCase()) : "";
+            const filtroTituloLower = filtroTitulo ? eliminarAcentos(filtroTitulo.toLowerCase()) : "";
 
-                // Verificar si el filtro está presente en cualquier parte del título o shortext
-                if ((tituloLower.includes(filtroTituloLower) || shortextLower.includes(filtroTituloLower)) &&
-                    (filtroCategoria === "" || noticia.categoria.toLowerCase() === filtroCategoria.toLowerCase())) {
-                    noticiasFiltradas.push(noticia);
-                }
-            });
+            // Verificar si el filtro está presente en el título
+            if (tituloLower.includes(filtroTituloLower) &&
+                (filtroCategoria === "" || noticia.categoria.toLowerCase() === filtroCategoria.toLowerCase())) {
+                noticiasFiltradas.push(noticia);
+            }
+});
 
             // Mostrar las noticias filtradas
             noticiasFiltradas.forEach((noticia) => {
                 const noticiaElement = document.createElement("div");
                 noticiaElement.classList.add("noticia");
 
-                // Crear el HTML para cada noticia
-                noticiaElement.innerHTML = `
-                    <h3 class="titulo-noticia" data-id="${noticia.id}">${noticia.titulo || "Sin título"}</h3>
-                    ${noticia.imagen ? `<img src="${noticia.imagen}" alt="Imagen de la noticia">` : ""}
-                `;
+            // Asigna el ID correctamente al div principal
+            noticiaElement.setAttribute("data-id", noticia.id);
+
+            noticiaElement.innerHTML = `
+                <h3 class="titulo-noticia">${noticia.titulo || "Sin título"}</h3>
+                ${noticia.imagen ? `<img src="${noticia.imagen}" alt="Imagen de la noticia">` : ""}
+            `;
 
                 // Agregar el contenedor al DOM
                 noticiasContainer.appendChild(noticiaElement);
             });
 
             // Agregar evento de clic para redirigir al detalle de la noticia
-            const titulos = document.querySelectorAll(".titulo-noticia");
-            titulos.forEach((titulo) => {
-                titulo.addEventListener("click", (e) => {
-                    const noticiaId = e.target.getAttribute("data-id");
-                    window.location.href = `noticia.html?id=${noticiaId}`; // Redirige a la página de detalle
+            document.querySelectorAll(".noticia").forEach((noticiaElement) => {
+                noticiaElement.addEventListener("click", (e) => {
+                    const noticiaId = e.currentTarget.getAttribute("data-id");
+                    console.log(`🔗 Redirigiendo a noticia con ID: ${noticiaId}`);
+                    window.location.href = `noticia.html?id=${noticiaId}`;
                 });
             });
 

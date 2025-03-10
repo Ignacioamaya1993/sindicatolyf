@@ -1,7 +1,6 @@
 import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
-    console.log("🚀 Script cargado correctamente.");
 
     const noticiasContainer = document.getElementById("noticiasContainer");
     const verMasBtn = document.getElementById("verMasBtn");
@@ -15,26 +14,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log("📌 Contenedor de noticias encontrado:", noticiasContainer);
 
     try {
+        console.log("🔍 Obteniendo datos de Firestore...");
+
         const dbInstance = getFirestore();
         const noticiasRef = collection(dbInstance, "noticias");
+
+        console.log("📂 Referencia a la colección creada:", noticiasRef);
+
         const q = query(noticiasRef, orderBy("fechaCreacion", "desc"));
+        console.log("📋 Query generada:", q);
+
         const querySnapshot = await getDocs(q);
+        console.log("📦 Snapshot recibido:", querySnapshot);
 
         if (querySnapshot.empty) {
             console.warn("⚠️ No se encontraron noticias en Firestore.");
+            return;
         }
 
         let count = 0;
 
         querySnapshot.forEach((doc) => {
+            console.log(`📄 Documento encontrado (ID: ${doc.id}):`, doc.data());
+
             if (count < maxNoticias) {
                 const noticia = doc.data();
                 const noticiaId = doc.id;
 
+                console.log("📰 Noticia procesada:", noticia);
+
                 const noticiaElement = document.createElement("div");
                 noticiaElement.classList.add("noticia");
 
-                // Alternar clases para animaciones (dos a la izquierda, dos a la derecha)
                 if (count % 4 < 2) {
                     noticiaElement.classList.add("entrada-derecha");
                     noticiaElement.style.setProperty("--direction", "100px");
@@ -54,13 +65,17 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         });
 
-        if (querySnapshot.size > maxNoticias) {
-            verMasBtn.style.display = "inline-block";
-        } else {
-            verMasBtn.style.display = "none";
-        }
+        console.log(`✅ Se han cargado ${count} noticias en el contenedor.`);
 
-        console.log("✅ Noticias cargadas correctamente.");
+        if (verMasBtn) {
+            if (querySnapshot.size > maxNoticias) {
+                verMasBtn.style.display = "inline-block";
+            } else {
+                verMasBtn.style.display = "none";
+            }
+        } else {
+            console.warn("⚠️ Advertencia: No se encontró el botón 'ver más'.");
+        }
 
         // Aplicar Intersection Observer para mostrar y ocultar al scrollear
         const observer = new IntersectionObserver((entries) => {
@@ -79,10 +94,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             observer.observe(noticia);
         });
 
-        // Evento para redirigir al hacer clic en la noticia
         document.querySelectorAll(".noticia").forEach((noticiaElement) => {
             noticiaElement.addEventListener("click", (e) => {
                 const noticiaId = e.currentTarget.getAttribute("data-id");
+                console.log(`🔗 Redirigiendo a noticia con ID: ${noticiaId}`);
                 window.location.href = `pages/noticia.html?id=${noticiaId}`;
             });
         });

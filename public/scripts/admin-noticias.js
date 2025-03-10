@@ -1,6 +1,8 @@
 import { db } from "./firebaseConfig.js";
 import { collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
 
 const auth = getAuth();
 const addNewsBtn = document.getElementById('add-news-btn');
@@ -130,7 +132,13 @@ newsForm.addEventListener('submit', async (e) => {
         await updateDoc(newsRef, { titulo: title, descripcion: content, imagen: imageUrl, categoria: category });
         Swal.fire('Éxito', 'Noticia actualizada', 'success');
     } else {
-        await addDoc(collection(db, 'noticias'), { titulo: title, descripcion: content, imagen: imageUrl, categoria: category });
+        await addDoc(collection(db, 'noticias'), { 
+            titulo: title, 
+            descripcion: content, 
+            imagen: imageUrl, 
+            categoria: category,
+            fechaCreacion: serverTimestamp() // Agrega la fecha de creación automáticamente
+        });
         Swal.fire('Éxito', 'Noticia agregada', 'success');
     }
 
