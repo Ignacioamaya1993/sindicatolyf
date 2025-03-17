@@ -1,10 +1,10 @@
 import { db } from "./firebaseConfig.js";
-import { collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-
 
 const auth = getAuth();
+
+// Elementos del DOM
 const addNewsBtn = document.getElementById('add-news-btn');
 const newsContainer = document.getElementById('news-container');
 const newsModal = document.getElementById('news-modal');
@@ -13,8 +13,12 @@ const modalTitle = document.getElementById('modal-title');
 const submitBtn = document.getElementById('submit-btn');
 const newsIdInput = document.getElementById('news-id');
 const newsTitleInput = document.getElementById('news-title');
-const closeModalBtn = document.getElementById('close-modal-btn'); // Ahora tomamos el botón del HTML
+const closeModalBtn = document.getElementById('close-modal-btn');
+const newsImageUrl = document.getElementById('news-image-url');
+const uploadImageBtn = document.getElementById('upload-image-btn');
+const newsCategorySelect = document.getElementById('news-category');
 
+// Esperar a que TinyMCE cargue
 const waitForTinyMCE = () => {
     return new Promise(resolve => {
         if (tinymce.get("news-content")) {
@@ -25,10 +29,75 @@ const waitForTinyMCE = () => {
     });
 };
 
-// Cargar todas las noticias
+// Inicializar TinyMCE
+tinymce.init({
+    selector: '#news-content',
+    plugins: 'advlist autolink lists link image charmap print preview anchor',
+    toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | removeformat | image',
+    image_uploadtab: true,
+    images_upload_handler: function (blobInfo, success, failure) {
+        console.log("Intentando subir imagen en TinyMCE...");
+        
+        const blob = blobInfo.blob();
+        console.log("Blob obtenido:", blob);
+
+        // Verificar si el archivo es válido
+        if (!blob) {
+            console.error("Error: No se pudo obtener el archivo.");
+            failure("No se pudo obtener el archivo.");
+            return;
+        }
+
+        // Subir a Cloudinary
+        const formData = new FormData();
+        formData.append("file", blob);
+        formData.append("upload_preset", "ml_default"); // Reemplaza con tu preset en Cloudinary
+
+        console.log("Enviando imagen a Cloudinary...");
+
+        fetch("https://api.cloudinary.com/v1_1/ddadtpm2o/image/upload", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Respuesta de Cloudinary:", data);
+            if (data.secure_url) {
+                console.log("Imagen subida con éxito:", data.secure_url);
+                success(data.secure_url);
+            } else {
+                console.error("Error en Cloudinary:", data);
+                failure("No se pudo subir la imagen a Cloudinary.");
+            }
+        })
+        .catch(error => {
+            console.error("Error al subir la imagen:", error);
+            failure("Error en la subida de imagen.");
+        });
+    }
+});
+
+
+// Función para subir imágenes a Cloudinary
+uploadImageBtn.addEventListener('click', () => {
+    const cloudinaryWidget = cloudinary.createUploadWidget({
+        cloudName: 'ddadtpm2o',
+        uploadPreset: 'ml_default',
+        multiple: false,
+        maxFiles: 1
+    }, (error, result) => {
+        if (result.event === "success") {
+            newsImageUrl.value = result.info.secure_url;
+        }
+    });
+
+    cloudinaryWidget.open();
+});
+
+// Cargar noticias
 const loadNews = async () => {
     const snapshot = await getDocs(collection(db, 'noticias'));
-    newsContainer.innerHTML = ''; 
+    newsContainer.innerHTML = '';
 
     snapshot.forEach(doc => {
         const news = doc.data();
@@ -51,16 +120,38 @@ const loadNews = async () => {
     });
 };
 
-// Verifica si hay contenido en los campos del formulario
-const hasUnsavedChanges = () => {
-    return newsTitleInput.value.trim() !== '' || 
-           tinymce.get("news-content").getContent().trim() !== '' || 
-           document.getElementById('news-image-url').value.trim() !== '';
+// Cargar categorías disponibles
+const loadCategories = async () => {
+    const snapshot = await getDocs(collection(db, 'noticias'));
+    const categories = new Set();
+
+    snapshot.forEach(doc => {
+        const categoria = doc.data().categoria;
+        if (categoria) {
+            categories.add(categoria);
+        }
+    });
+
+    newsCategorySelect.innerHTML = '';
+    const defaultOption = document.createElement('option');
+    defaultOption.textContent = "No determinada";
+    defaultOption.selected = true;
+    newsCategorySelect.appendChild(defaultOption);
+
+    categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        newsCategorySelect.appendChild(option);
+    });
 };
 
 // Confirmar cierre si hay cambios sin guardar
 const confirmCloseModal = async () => {
-    if (hasUnsavedChanges()) {
+    if (newsTitleInput.value.trim() !== '' || 
+        tinymce.get("news-content").getContent().trim() !== '' || 
+        newsImageUrl.value.trim() !== '') {
+        
         const result = await Swal.fire({
             title: "¿Estás seguro?",
             text: "Si cierras el popup, se perderán los cambios.",
@@ -74,14 +165,13 @@ const confirmCloseModal = async () => {
     return true;
 };
 
-// Función para cerrar el modal con confirmación
+// Cerrar el modal con confirmación
 const closeModal = async () => {
-    const canClose = await confirmCloseModal();
-    if (canClose) {
+    if (await confirmCloseModal()) {
         newsModal.style.display = 'none';
         newsForm.reset();
         tinymce.get("news-content").setContent("");
-        document.getElementById('news-image-url').value = "";
+        newsImageUrl.value = "";
     }
 };
 
@@ -95,37 +185,32 @@ addNewsBtn.addEventListener('click', async () => {
     await waitForTinyMCE();
     tinymce.get("news-content").setContent("");
 
-    // Llamamos para cargar las categorías
     await loadCategories();
-
-    document.getElementById('news-image-url').value = '';
+    newsImageUrl.value = '';
     submitBtn.textContent = 'Guardar';
 });
 
-// Cerrar modal con la X
+// Cerrar modal con la X o Escape
 closeModalBtn.addEventListener('click', closeModal);
-
-// Cerrar modal con la tecla Escape
 document.addEventListener('keydown', async (event) => {
     if (event.key === 'Escape' && newsModal.style.display === 'flex') {
         closeModal();
     }
 });
 
-// Agregar o editar noticia
+// Guardar o actualizar noticia
 newsForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const title = newsTitleInput.value.trim();
     const content = tinymce.get("news-content").getContent().trim();
-    const category = document.getElementById('news-category').value;  // Obtenemos la categoría seleccionada
+    const category = newsCategorySelect.value;
+    const imageUrl = newsImageUrl.value.trim();
 
     if (!content) {
         Swal.fire('Error', 'El contenido no puede estar vacío', 'error');
         return;
     }
-
-    const imageUrl = document.getElementById('news-image-url').value;
 
     if (newsIdInput.value) {
         const newsRef = doc(db, 'noticias', newsIdInput.value);
@@ -137,93 +222,25 @@ newsForm.addEventListener('submit', async (e) => {
             descripcion: content, 
             imagen: imageUrl, 
             categoria: category,
-            fechaCreacion: serverTimestamp() // Agrega la fecha de creación automáticamente
+            fechaCreacion: serverTimestamp() 
         });
         Swal.fire('Éxito', 'Noticia agregada', 'success');
     }
 
-    newsModal.style.display = 'none';
+    closeModal();
     loadNews();
 });
 
-// Eliminar una noticia con confirmación de SweetAlert
+// Eliminar noticia
 newsContainer.addEventListener('click', async (e) => {
-    if (e.target.classList.contains('edit-btn')) {
-        const docId = e.target.getAttribute('data-id');
-        const docRef = doc(db, 'noticias', docId);
-        const docSnapshot = await getDoc(docRef);
-        const news = docSnapshot.data();
-
-        modalTitle.textContent = 'Editar Noticia';
-        newsIdInput.value = docId;
-        newsTitleInput.value = news.titulo || "";
-
-        await waitForTinyMCE();
-        tinymce.get("news-content").setContent(news.descripcion || "");
-
-        // Cargar categoría en el select
-        document.getElementById('news-category').value = news.categoria || '';
-
-        submitBtn.textContent = 'Actualizar';
-        newsModal.style.display = 'flex';
-    }
-
     if (e.target.classList.contains('delete-btn')) {
         const docId = e.target.getAttribute('data-id');
-        const docRef = doc(db, 'noticias', docId);
-
-        // Confirmar antes de eliminar
-        const result = await Swal.fire({
-            title: '¿Estás seguro de eliminar esta noticia?',
-            html: `<p class="swal-text">No podrás deshacer esta acción.</p>`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar'
-        });
-
-        if (result.isConfirmed) {
-            // Proceder con la eliminación si el usuario confirma
-            await deleteDoc(docRef);
-            Swal.fire('Éxito', 'Noticia eliminada', 'success');
+        if (await Swal.fire({ title: '¿Eliminar?', icon: 'warning', showCancelButton: true })) {
+            await deleteDoc(doc(db, 'noticias', docId));
+            Swal.fire('Eliminado', '', 'success');
             loadNews();
-        } else {
-            // Si el usuario cancela, no hacer nada
-            Swal.fire('Cancelado', 'La noticia no fue eliminada', 'info');
         }
     }
 });
-
-
-// Cargar categorías disponibles
-const loadCategories = async () => {
-    const snapshot = await getDocs(collection(db, 'noticias')); 
-    const categories = new Set();  // Usamos un Set para evitar categorías duplicadas
-
-    snapshot.forEach(doc => {
-        const categoria = doc.data().categoria;
-        if (categoria) {
-            categories.add(categoria);  // Añadimos cada categoría al Set
-        }
-    });
-
-    // Ahora cargamos las categorías en el campo select del formulario
-    const categorySelect = document.getElementById('news-category');
-    categorySelect.innerHTML = '';  // Limpiamos el select antes de agregar las nuevas opciones
-
-    // Añadimos la opción por defecto "No determinada"
-    const defaultOption = document.createElement('option');
-    defaultOption.textContent = "No determinada";
-    defaultOption.selected = true;
-    categorySelect.appendChild(defaultOption);
-
-    // Añadimos las otras categorías al select
-    categories.forEach(category => {
-        const option = document.createElement('option');
-        option.value = category;
-        option.textContent = category;
-        categorySelect.appendChild(option);
-    });
-};
 
 window.onload = loadNews;

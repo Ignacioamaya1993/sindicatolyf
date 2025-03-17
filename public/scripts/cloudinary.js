@@ -7,12 +7,18 @@ const cloudinaryWidget = cloudinary.createUploadWidget({
     if (result.event === "success") {
         console.log("Imagen subida correctamente:", result.info);
         const imageUrl = result.info.secure_url;  // URL de la imagen subida
-        // Usa la URL de la imagen para agregarla a tu formulario o base de datos
+        
+        // Guardar la URL en el input oculto
+        document.getElementById("news-image-url").value = imageUrl;
+
+        Swal.fire("Éxito", "Imagen subida correctamente", "success");
     } else if (error) {
         console.error("Error al subir la imagen:", error);
+        Swal.fire("Error", "No se pudo subir la imagen", "error");
     }
 });
 
+// Asignar el botón al widget de Cloudinary
 document.getElementById("upload-image-btn").addEventListener("click", function() {
     cloudinaryWidget.open();
 });
