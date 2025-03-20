@@ -127,3 +127,39 @@ th {
     margin-top: 5px;
     display: none;
 }
+
+/* Pagination */
+#pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+#pagination button {
+    background-color: #08c3f1;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+#pagination #pageInfo {
+    margin: 0 15px;
+    padding-top: 5px;
+    color: #ffffff;
+}
+
+#pagination button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.page-info {
+    margin-bottom: 100px;
+    color: white;  /* Cambia el color a blanco */
+    font-size: 18px;
+    margin: 0 10px;
+}

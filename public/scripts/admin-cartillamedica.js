@@ -7,6 +7,8 @@ const professionalList = document.getElementById("professionalList");
 const searchInput = document.getElementById("search");
 const categoryFilter = document.getElementById("categoryFilter");
 const addProfessionalBtn = document.getElementById("addProfessional");
+let currentPage = 1; // Página actual
+const professionalsPerPage = 15; // Profesionales por página
 
 let professionals = [];
 let categories = new Set(); // Para almacenar categorías únicas
@@ -44,136 +46,125 @@ function loadCategories() {
     });
 }
 
-// **🔹 Renderizar la tabla con profesionales (con filtro)**
+// **🔹 Renderizar la tabla con profesionales (con paginación)**
 function renderProfessionals() {
-    professionalList.innerHTML = "";
+    professionals.sort((a, b) => {
+        if (a.especialidad !== b.especialidad) {
+            return a.especialidad.localeCompare(b.especialidad);
+        }
+        return a.apenom.localeCompare(b.apenom);
+    });
+
     const selectedCategory = categoryFilter.value;
     const searchTerm = searchInput.value.toLowerCase();
-
-    professionals
+    const filteredProfessionals = professionals
         .filter(prof => (selectedCategory === "Todas las categorías" || prof.especialidad === selectedCategory))
-        .filter(prof => prof.apenom.toLowerCase().includes(searchTerm))
-        .forEach(prof => {
-            const telefonos = Array.isArray(prof.telefono) ? prof.telefono.join(" / ") : prof.telefono || "";
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${prof.especialidad || ""}</td>
-                <td>${prof.apenom || ""}</td>
-                <td>${prof.direccion || ""}</td>
-                <td>${prof.localidad || ""}</td>
-                <td>${telefonos}</td>
-                <td class="action-buttons">
-                    <button class="edit" onclick="editProfessional('${prof.id}')"><i class="fas fa-edit"></i></button>
-                    <button class="delete" onclick="deleteProfessional('${prof.id}')"><i class="fas fa-trash-alt"></i></button>
-                </td>
-            `;
-            professionalList.appendChild(row);
+        .filter(prof => prof.apenom.toLowerCase().includes(searchTerm));
+
+    const totalProfessionals = filteredProfessionals.length;
+    const totalPages = Math.ceil(totalProfessionals / professionalsPerPage);
+    
+    const startIndex = (currentPage - 1) * professionalsPerPage;
+    const endIndex = startIndex + professionalsPerPage;
+    const professionalsToShow = filteredProfessionals.slice(startIndex, endIndex);
+
+    professionalList.innerHTML = "";
+    professionalsToShow.forEach(prof => {
+        const telefonos = Array.isArray(prof.telefono) ? prof.telefono.join(" / ") : prof.telefono || "";
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${prof.especialidad || ""}</td>
+            <td contenteditable="true" id="name-${prof.id}" data-original="${prof.apenom || ""}">${prof.apenom || ""}</td>
+            <td contenteditable="true" id="address-${prof.id}" data-original="${prof.direccion || ""}">${prof.direccion || ""}</td>
+            <td contenteditable="true" id="city-${prof.id}" data-original="${prof.localidad || ""}">${prof.localidad || ""}</td>
+            <td contenteditable="true" id="phone-${prof.id}" data-original="${telefonos}">${telefonos}</td>
+            <td class="action-buttons">
+                <button id="saveBtn-${prof.id}" class="save" onclick="saveProfessional('${prof.id}')" disabled>
+                    <i class="fas fa-check-circle"></i>
+                </button>
+                <button class="delete" onclick="deleteProfessional('${prof.id}')">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </td>
+        `;
+        professionalList.appendChild(row);
+
+        // Agregar eventos para detectar cambios y habilitar el botón de guardar
+        ["name", "address", "city", "phone"].forEach(field => {
+            const cell = document.getElementById(`${field}-${prof.id}`);
+            cell.addEventListener("input", () => handleInputChange(prof.id));
         });
+    });
+
+    createPaginationButtons(totalPages);
 }
 
-async function addProfessional() {
-    // Convertir el Set de categorías en un array y agregar opción para nueva especialidad
-    const categoriesArray = Array.from(categories).filter(c => c !== "Todas las categorías");
-    categoriesArray.push("NUEVA ESPECIALIDAD");
+// **🔹 Detectar cambios en los campos editables**
+function handleInputChange(profId) {
+    const saveBtn = document.getElementById(`saveBtn-${profId}`);
+    const fields = ["name", "address", "city", "phone"];
 
-    // Construir opciones del select
-    const categoryOptions = categoriesArray.map(category =>
-        `<option value="${category}">${category}</option>`
-    ).join("");
-
-    const { value: formValues } = await Swal.fire({
-        title: "Agregar Profesional",
-        html: `
-            <input id="swal-apenom" class="swal2-input" placeholder="Nombre y apellido">
-            <select id="swal-especialidad" class="swal2-input">
-                ${categoryOptions}
-            </select>
-            <input id="swal-nueva-especialidad" class="swal2-input" placeholder="Nueva especialidad" style="display: none;">
-            <input id="swal-direccion" class="swal2-input" placeholder="Dirección">
-            <input id="swal-localidad" class="swal2-input" placeholder="Localidad">
-            <input id="swal-telefono" class="swal2-input" placeholder="Teléfono (separados por coma)">
-        `,
-        showCancelButton: true,
-        confirmButtonText: "Guardar",
-        didOpen: () => {
-            const selectEspecialidad = document.getElementById("swal-especialidad");
-            const nuevaEspecialidadInput = document.getElementById("swal-nueva-especialidad");
-
-            // Mostrar el input si se selecciona "Nueva especialidad"
-            selectEspecialidad.addEventListener("change", () => {
-                if (selectEspecialidad.value === "NUEVA ESPECIALIDAD") {
-                    nuevaEspecialidadInput.style.display = "block";
-                    nuevaEspecialidadInput.value = ""; // Limpiar campo
-                } else {
-                    nuevaEspecialidadInput.style.display = "none";
-                }
-            });
-        },
-        preConfirm: () => {
-            const especialidadSeleccionada = document.getElementById("swal-especialidad").value;
-            const nuevaEspecialidad = document.getElementById("swal-nueva-especialidad").value.trim();
-
-            return {
-                apenom: document.getElementById("swal-apenom").value.trim(),
-                especialidad: especialidadSeleccionada === "NUEVA ESPECIALIDAD" ? nuevaEspecialidad : especialidadSeleccionada,
-                direccion: document.getElementById("swal-direccion").value.trim(),
-                localidad: document.getElementById("swal-localidad").value.trim(),
-                telefono: document.getElementById("swal-telefono").value.trim().split(",").map(t => t.trim()).filter(Boolean)
-            };
-        }
+    let hasChanges = fields.some(field => {
+        const cell = document.getElementById(`${field}-${profId}`);
+        return cell.innerText.trim() !== cell.dataset.original.trim();
     });
 
-    if (formValues) {
-        try {
-            await addDoc(collection(db, "profesionales"), formValues);
-            Swal.fire("Éxito", "Profesional agregado", "success");
-            loadProfessionals();
-        } catch (error) {
-            console.error("Error al agregar profesional:", error);
-        }
+    saveBtn.disabled = !hasChanges; // Habilitar si hay cambios
+    saveBtn.style.backgroundColor = hasChanges ? "green" : ""; // Cambiar a verde si hay cambios
+    saveBtn.style.color = hasChanges ? "white" : ""; // Asegurar visibilidad del texto/icono
+}
+
+// **🔹 Función para crear los botones de paginación**
+function createPaginationButtons(totalPages) {
+    const paginationContainer = document.getElementById("pagination");
+    paginationContainer.innerHTML = "";
+
+    if (currentPage > 1) {
+        const prevButton = document.createElement("button");
+        prevButton.textContent = "Anterior";
+        prevButton.onclick = () => {
+            currentPage--;
+            renderProfessionals();
+        };
+        paginationContainer.appendChild(prevButton);
     }
-}   
 
-// **🔹 Función para editar un profesional**
-async function editProfessional(id) {
-    const professional = professionals.find(prof => prof.id === id);
-    if (!professional) {
-        Swal.fire("Error", "No se encontró el profesional", "error");
-        return;
-    }
+    const pageInfo = document.createElement("span");
+    pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
+    pageInfo.classList.add("page-info");
+    paginationContainer.appendChild(pageInfo);
 
-    const { value: formValues } = await Swal.fire({
-        title: "Editar Profesional",
-        html: `
-            <input id="swal-apenom" class="swal2-input" placeholder="Nombre y apellido" value="${professional.apenom || ''}">
-            <input id="swal-especialidad" class="swal2-input" placeholder="Especialidad" value="${professional.especialidad || ''}">
-            <input id="swal-direccion" class="swal2-input" placeholder="Dirección" value="${professional.direccion || ''}">
-            <input id="swal-localidad" class="swal2-input" placeholder="Localidad" value="${professional.localidad || ''}">
-            <input id="swal-telefono" class="swal2-input" placeholder="Teléfono (separados por coma)" value="${(professional.telefono || []).join(', ')}">
-        `,
-        showCancelButton: true,
-        confirmButtonText: "Actualizar",
-        preConfirm: () => ({
-            apenom: document.getElementById('swal-apenom').value.trim(),
-            especialidad: document.getElementById('swal-especialidad').value.trim(),
-            direccion: document.getElementById('swal-direccion').value.trim(),
-            localidad: document.getElementById('swal-localidad').value.trim(),
-            telefono: document.getElementById('swal-telefono').value.trim().split(",").map(t => t.trim()).filter(Boolean)
-        })
-    });
-
-    if (formValues) {
-        try {
-            await updateDoc(doc(db, "profesionales", id), formValues);
-            Swal.fire("Éxito", "Profesional actualizado", "success");
-            loadProfessionals();
-        } catch (error) {
-            console.error("Error al actualizar profesional:", error);
-        }
+    if (currentPage < totalPages) {
+        const nextButton = document.createElement("button");
+        nextButton.textContent = "Siguiente";
+        nextButton.onclick = () => {
+            currentPage++;
+            renderProfessionals();
+        };
+        paginationContainer.appendChild(nextButton);
     }
 }
 
-// **🔹 Función para eliminar un profesional**
+// **🔹 Guardar profesional actualizado**
+async function saveProfessional(id) {
+    const updatedProfessional = {
+        apenom: document.getElementById(`name-${id}`).innerText.trim(),
+        direccion: document.getElementById(`address-${id}`).innerText.trim(),
+        localidad: document.getElementById(`city-${id}`).innerText.trim(),
+        telefono: document.getElementById(`phone-${id}`).innerText.trim()
+    };
+
+    try {
+        await updateDoc(doc(db, "profesionales", id), updatedProfessional);
+        Swal.fire("Éxito", "Los datos han sido actualizados", "success");
+        loadProfessionals();
+    } catch (error) {
+        console.error("Error al actualizar profesional:", error);
+        Swal.fire("Error", "No se pudo actualizar el profesional", "error");
+    }
+}
+
+// **🔹 Eliminar un profesional**
 async function deleteProfessional(id) {
     const confirmDelete = await Swal.fire({
         title: "¿Estás seguro?",
@@ -195,14 +186,11 @@ async function deleteProfessional(id) {
     }
 }
 
-// **🔹 Eventos de filtro**
+// **🔹 Inicializar eventos**
+document.addEventListener("DOMContentLoaded", loadProfessionals);
 searchInput.addEventListener("input", renderProfessionals);
 categoryFilter.addEventListener("change", renderProfessionals);
-
-// **🔹 Inicializar eventos**
 addProfessionalBtn.addEventListener("click", addProfessional);
-document.addEventListener("DOMContentLoaded", loadProfessionals);
 
-// **🔹 Hacer funciones accesibles en `window`**
-window.editProfessional = editProfessional;
+window.saveProfessional = saveProfessional;
 window.deleteProfessional = deleteProfessional;
