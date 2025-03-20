@@ -79,13 +79,10 @@ function renderProfessionals() {
             <td contenteditable="true" id="city-${prof.id}" data-original="${prof.localidad || ""}">${prof.localidad || ""}</td>
             <td contenteditable="true" id="phone-${prof.id}" data-original="${telefonos}">${telefonos}</td>
             <td class="action-buttons">
-                <button id="saveBtn-${prof.id}" class="save" onclick="saveProfessional('${prof.id}')" disabled>
-                    <i class="fas fa-check-circle"></i>
-                </button>
-                <button class="delete" onclick="deleteProfessional('${prof.id}')">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
+                <button id="saveBtn-${prof.id}" class="guardar-btn" onclick="saveProfessional('${prof.id}')" disabled>💾</button>
+                <button class="eliminar-btn" onclick="deleteProfessional('${prof.id}')">🗑️</button>
             </td>
+
         `;
         professionalList.appendChild(row);
 
